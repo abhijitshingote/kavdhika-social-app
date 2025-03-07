@@ -1,0 +1,55 @@
+{% extends 'kavdhika_app/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'tinymce/css/prism.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Create a New Post</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.content.id_for_label }}" class="form-label">Content</label>
+                        {{ form.content }}
+                        {% if form.content.errors %}
+                        <div class="text-danger">
+                            {{ form.content.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.image.id_for_label }}" class="form-label">Image (optional)</label>
+                        {{ form.image }}
+                        {% if form.image.errors %}
+                        <div class="text-danger">
+                            {{ form.image.errors }}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">Share a photo with your family (optional)</div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Post</button>
+                        <a href="{% url 'kavdhika_app:home' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ form.media }}
+{% endblock %} 

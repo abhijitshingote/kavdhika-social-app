@@ -1,0 +1,57 @@
+.logo {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    text-decoration: none !important;
+    letter-spacing: 2px;
+}
+
+.logo:hover .logo-kav {
+    color: #FF4B4B;
+}
+
+.logo:hover .logo-dhi {
+    color: #2EBDB3;
+}
+
+.logo:hover .logo-ka {
+    color: #2596BE;
+}
+
+.logo-kav {
+    color: #FF6B6B;
+    text-shadow: 2px 2px 4px rgba(255, 107, 107, 0.3);
+    transition: color 0.3s ease;
+}
+
+.logo-dhi {
+    color: #4ECDC4;
+    text-shadow: 2px 2px 4px rgba(78, 205, 196, 0.3);
+    transition: color 0.3s ease;
+}
+
+.logo-ka {
+    color: #45B7D1;
+    text-shadow: 2px 2px 4px rgba(69, 183, 209, 0.3);
+    transition: color 0.3s ease;
+}
+
+.logo-separator {
+    color: #95A5A6;
+    font-weight: 300;
+    margin: 0 3px;
+    text-shadow: none;
+}
+
+/* Override any Bootstrap navbar-brand styles */
+.navbar-brand.logo {
+    color: inherit !important;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .logo {
+        font-size: 1.6rem;
+    }
+} 

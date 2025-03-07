@@ -1,0 +1,103 @@
+{% extends 'kavdhika_app/base.html' %}
+{% load custom_filters %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        {% if user.is_authenticated %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Share with your family</h5>
+                <a href="{% url 'kavdhika_app:create_post' %}" class="btn btn-primary">Create a Post</a>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if posts %}
+            {% for post in posts %}
+            <div class="card">
+                <div class="card-header bg-white d-flex align-items-center">
+                    <div>
+                        <h5 class="mb-0">{{ post.author.get_full_name|default:post.author.username }}</h5>
+                        <small class="text-muted">{{ post.created_at|date:"F j, Y, g:i a" }}</small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ post.content|safe }}</p>
+                    {% if post.image %}
+                    <img src="{{ post.image.url }}" alt="Post image" class="img-fluid rounded mb-3">
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            {% for reaction_type, emoji in reaction_choices %}
+                            <button class="reaction-btn" data-post-id="{{ post.id }}" data-reaction-type="{{ reaction_type }}">
+                                {{ emoji }} <span class="reaction-count">{{ reaction_counts|get_item:post.id|get_item:reaction_type }}</span>
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <div>
+                            <a href="{% url 'kavdhika_app:post_detail' post_id=post.id %}" class="text-decoration-none">
+                                <i class="far fa-comment"></i> {{ post.comment_count }} Comments
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">No posts yet</h5>
+                    <p class="card-text">Be the first to share something with your family!</p>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'kavdhika_app:create_post' %}" class="btn btn-primary">Create a Post</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Initialize reaction buttons
+        $('.reaction-btn').click(function() {
+            if (!{{ user.is_authenticated|yesno:"true,false" }}) {
+                window.location.href = "{% url 'admin:login' %}";
+                return;
+            }
+            
+            var postId = $(this).data('post-id');
+            var reactionType = $(this).data('reaction-type');
+            var button = $(this);
+            
+            $.ajax({
+                url: '/post/' + postId + '/react/',
+                type: 'POST',
+                data: {
+                    'reaction_type': reactionType,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(data) {
+                    if (data.status === 'success') {
+                        // Update reaction counts
+                        updateReactionCounts(postId, data.reaction_counts);
+                    }
+                }
+            });
+        });
+        
+        function updateReactionCounts(postId, counts) {
+            for (var type in counts) {
+                $('.reaction-btn[data-post-id="' + postId + '"][data-reaction-type="' + type + '"] .reaction-count').text(counts[type]);
+            }
+        }
+    });
+</script>
+{% endblock %} 
