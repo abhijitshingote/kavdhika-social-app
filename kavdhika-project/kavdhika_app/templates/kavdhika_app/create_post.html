@@ -5,6 +5,27 @@
 
 {% block extra_css %}
 <link href="{% static 'tinymce/css/prism.css' %}" rel="stylesheet">
+<style>
+    #camera-preview {
+        width: 100%;
+        max-width: 640px;
+        margin: 10px 0;
+        display: none;
+    }
+    #capture-controls {
+        display: none;
+        margin: 10px 0;
+    }
+    .preview-container {
+        position: relative;
+        display: inline-block;
+    }
+    #captured-image {
+        max-width: 100%;
+        display: none;
+        margin: 10px 0;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -29,8 +50,28 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="{{ form.image.id_for_label }}" class="form-label">Image (optional)</label>
+                        <label class="form-label">Image</label>
+                        <div class="d-flex gap-2 mb-2">
+                            <button type="button" class="btn btn-secondary" id="start-camera">
+                                <i class="fas fa-camera"></i> Take Photo
+                            </button>
+                            <label class="btn btn-secondary" for="{{ form.image.id_for_label }}">
+                                <i class="fas fa-upload"></i> Upload Photo
+                            </label>
+                        </div>
                         {{ form.image }}
+                        <div id="camera-container">
+                            <video id="camera-preview" autoplay playsinline></video>
+                            <div id="capture-controls">
+                                <button type="button" class="btn btn-primary" id="capture-photo">
+                                    <i class="fas fa-camera"></i> Capture
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="retake-photo">
+                                    <i class="fas fa-redo"></i> Retake
+                                </button>
+                            </div>
+                            <img id="captured-image" class="img-fluid rounded">
+                        </div>
                         {% if form.image.errors %}
                         <div class="text-danger">
                             {{ form.image.errors }}
@@ -52,4 +93,87 @@
 
 {% block extra_js %}
 {{ form.media }}
+<script>
+    $(document).ready(function() {
+        let stream = null;
+        const cameraPreview = document.getElementById('camera-preview');
+        const captureControls = document.getElementById('capture-controls');
+        const capturedImage = document.getElementById('captured-image');
+        const fileInput = document.getElementById('{{ form.image.id_for_label }}');
+        
+        // Hide the file input visually but keep it functional
+        fileInput.style.display = 'none';
+        
+        // Start camera when button is clicked
+        $('#start-camera').click(async function() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    }
+                });
+                cameraPreview.srcObject = stream;
+                cameraPreview.style.display = 'block';
+                captureControls.style.display = 'block';
+                capturedImage.style.display = 'none';
+                $(this).hide();
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                alert('Could not access camera. Please make sure you have granted camera permissions.');
+            }
+        });
+        
+        // Capture photo
+        $('#capture-photo').click(function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = cameraPreview.videoWidth;
+            canvas.height = cameraPreview.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(cameraPreview, 0, 0, canvas.width, canvas.height);
+            
+            // Display the captured image
+            capturedImage.src = canvas.toDataURL('image/jpeg');
+            capturedImage.style.display = 'block';
+            
+            // Convert the canvas to a Blob
+            canvas.toBlob(function(blob) {
+                // Create a File from the Blob
+                const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
+                
+                // Create a FileList-like object
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                
+                // Set the file input's files
+                fileInput.files = dataTransfer.files;
+            }, 'image/jpeg', 0.8);
+            
+            // Hide camera preview and show retake button
+            cameraPreview.style.display = 'none';
+            $('#capture-photo').hide();
+            $('#retake-photo').show();
+            
+            // Stop the camera stream
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
+        
+        // Retake photo
+        $('#retake-photo').click(function() {
+            $('#start-camera').click();
+            $(this).hide();
+            $('#capture-photo').show();
+        });
+        
+        // Clean up on page unload
+        $(window).on('unload', function() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
+    });
+</script>
 {% endblock %} 
