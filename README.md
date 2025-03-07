@@ -19,48 +19,48 @@ A private social media platform designed specifically for small family groups. T
 
 ## Setup Instructions
 
-1. Clone the repository
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/kavdhika-social-app.git
+   cd kavdhika-social-app
+   ```
+
 2. Create a virtual environment:
    ```
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
+
 3. Install dependencies:
    ```
    pip install -r requirements.txt
    ```
+
 4. Run migrations:
    ```
    python manage.py migrate
    ```
+
 5. Create a superuser:
    ```
    python manage.py createsuperuser
    ```
+
 6. Run the development server:
    ```
    python manage.py runserver
    ```
-7. Access the admin interface at http://127.0.0.1:8000/admin/ to create users for family members
 
-## Usage
+7. Access the application at http://127.0.0.1:8000/
 
-1. Log in with your credentials
-2. Browse the family feed on the home page
-3. Create new posts using the "Create Post" button
-4. React to posts with emoji buttons
-5. Comment on posts to engage in conversations
-6. Delete your own comments if needed
+## Contributing
 
-## Security Considerations
-
-This application is designed for private use by a small group of family members. It's recommended to:
-
-1. Use strong passwords for all accounts
-2. Keep the application on a secure server
-3. Regularly update Django and dependencies
-4. Consider enabling HTTPS for production deployment
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
-This project is for private use only and not licensed for public distribution. 
+This project is licensed under the MIT License - see the LICENSE file for details. 
